@@ -15,7 +15,7 @@ Time:05:59:54
 DS18B20:
 21.643ºC, 62.8 percent humidity, 21.5006ºC Perceived temperature.
 Sleeping for 1 minute...
-This will in later versions use a custom developed API to insert every read into a MySQL server.
 ```
+This will in later versions use a custom developed API to insert every read into a MySQL server.
 
 Then, this data will be presented beautifully via web and (possibly) Android and or iOS apps.
