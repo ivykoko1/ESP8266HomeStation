@@ -20,13 +20,17 @@
 
 #define LED_PIN D5
 
-#define SAMPLES_PER_LOG 32
-#define TSPL SAMPLES_PER_LOG
-#define HSPL 4
+#define TEMPERATURE_SAMPLE_RATE 32
+#define TSR TEMPERATURE_SAMPLE_RATE
 
+#define HUMIDITY_SAMPLE_RATE 8
+#define HSR HUMIDITY_SAMPLE_RATE
+
+//Sensor declarations
 DHT dht(DHT_PIN, DHT_TYPE);
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
+//NTP declarations
 WiFiUDP ntpUdp;
 NTPClient ntpClient(ntpUdp, "europe.pool.ntp.org", 7200);
 
@@ -72,11 +76,11 @@ void loop()
 
   float dt = 0.0f;
 
-  for (uint8_t i = 0; i < TSPL; i++){
+  for (uint8_t i = 0; i < TSR; i++){
     digitalWrite(LED_PIN, 1);
     sensors.requestTemperatures();
     dt += sensors.getTempCByIndex(0);
-    if(i % HSPL == 0) {
+    if(i % HSR == 0) {
       h += dht.readHumidity();
     }
     digitalWrite(LED_PIN, 0);
@@ -86,8 +90,8 @@ void loop()
   Serial.print(F("Time:"));
   Serial.println(ntpClient.getFormattedTime());
 
-  float avgDallas = dt/TSPL;
-  float avgHum = h / (TSPL/HSPL);
+  float avgDallas = dt / TSR;
+  float avgHum = h / (TSR / HSR);
 
   float dallasTic = dht.computeHeatIndex(avgDallas, avgHum, false);
 
