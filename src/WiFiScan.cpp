@@ -14,17 +14,20 @@
 #define AP_BSSID "COWIFI-19"
 #define AP_PASS "99F595CBC3B674E5"
 
-#define ONE_WIRE_BUS D2
-#define DHT_PIN D3
-#define DHT_TYPE DHT11
-
-#define LED_PIN D5
-
 #define TEMPERATURE_SAMPLE_RATE 32
 #define TSR TEMPERATURE_SAMPLE_RATE
 
 #define HUMIDITY_SAMPLE_RATE 8
 #define HSR HUMIDITY_SAMPLE_RATE
+
+#define TIME_LIGHT_SLEEP(s) s*1000
+
+#define ONE_WIRE_BUS D2
+#define DHT_PIN D3
+#define DHT_TYPE DHT11
+
+//LED will turn on when it makes a single read, so it should blink TSR times and stay off for TIME_LIGHT_SLEEP(s)
+#define LED_PIN D5
 
 //Sensor declarations
 DHT dht(DHT_PIN, DHT_TYPE);
@@ -98,6 +101,6 @@ void loop()
   Serial.println(F("DS18B20:"));
   Serial.printf("%.3fºC, %.1f percent humidity, %.4fºC Perceived temperature.\n", avgDallas, avgHum, dallasTic);
   Serial.println(F("Sleeping for 1 minute..."));
-  delay(60000);
+  delay(TIME_LIGHT_SLEEP(60));
   Serial.println(F("Reading now"));
 }
