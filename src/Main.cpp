@@ -10,9 +10,8 @@
 #include "NTPClient.h"
 #include "DallasTemperature.h"
 #include "WiFiUdp.h"
+#include "WifiCredentials.h"
 
-#define AP_BSSID "COWIFI-19"
-#define AP_PASS "99F595CBC3B674E5"
 
 #define TEMPERATURE_SAMPLE_RATE 32
 #define TSR TEMPERATURE_SAMPLE_RATE

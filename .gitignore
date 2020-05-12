@@ -18,3 +18,4 @@ out
 .gradle
 .vscode
 .pio
+include/WifiCredentials.h
