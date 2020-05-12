@@ -19,7 +19,9 @@
 #define HUMIDITY_SAMPLE_RATE 8
 #define HSR HUMIDITY_SAMPLE_RATE
 
-#define TIME_LIGHT_SLEEP(s) s*1000
+#define TIME_PER_SAMPLE 900 
+
+#define TIME_LIGHT_SLEEP(r,t) (r*(t)+(1000*r))
 
 #define ONE_WIRE_BUS D2
 #define DHT_PIN D3
@@ -27,6 +29,8 @@
 
 //LED will turn on when it makes a single read, so it should blink TSR times and stay off for TIME_LIGHT_SLEEP(s)
 #define LED_PIN D5
+
+
 
 //Sensor declarations
 DHT dht(DHT_PIN, DHT_TYPE);
@@ -86,7 +90,7 @@ void loop()
       h += dht.readHumidity();
     }
     digitalWrite(LED_PIN, 0);
-    delay(900);
+    delay(TIME_PER_SAMPLE);
   }
   ntpClient.forceUpdate();
   Serial.print(F("Time:"));
@@ -99,7 +103,7 @@ void loop()
 
   Serial.println(F("DS18B20:"));
   Serial.printf("%.4fºC, %.1f percent humidity, %.4fºC Perceived temperature.\n", avgDallas, avgHum, dallasTic);
-  Serial.println(F("Sleeping for 75 secs..."));
-  delay(TIME_LIGHT_SLEEP(75));
+  Serial.printf("Sleeping for %i secs...", (TIME_LIGHT_SLEEP(TEMPERATURE_SAMPLE_RATE, TIME_PER_SAMPLE) / 1000 ));
+  delay(TIME_LIGHT_SLEEP(TEMPERATURE_SAMPLE_RATE, TIME_PER_SAMPLE));
   Serial.println(F("Reading now"));
 }
