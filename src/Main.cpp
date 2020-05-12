@@ -86,7 +86,7 @@ void loop()
       h += dht.readHumidity();
     }
     digitalWrite(LED_PIN, 0);
-    delay(1200);
+    delay(900);
   }
   ntpClient.forceUpdate();
   Serial.print(F("Time:"));
@@ -99,7 +99,7 @@ void loop()
 
   Serial.println(F("DS18B20:"));
   Serial.printf("%.4fºC, %.1f percent humidity, %.4fºC Perceived temperature.\n", avgDallas, avgHum, dallasTic);
-  Serial.println(F("Sleeping for 1 minute..."));
-  delay(TIME_LIGHT_SLEEP(60));
+  Serial.println(F("Sleeping for 75 secs..."));
+  delay(TIME_LIGHT_SLEEP(75));
   Serial.println(F("Reading now"));
 }
