@@ -20,6 +20,7 @@
         int json = sprintf(buffer, "{\"sensorTime\" %lu, \"temperature\": %.4f, \"humidity\": %.2f, \"temp_index\": %.4f}", data.sensor_time, data.temp, data.humidity, data.temp_index);
         Serial.println(buffer);
         int responseCode  = this->httpClient.POST(buffer);
+        Serial.println(responseCode);
         httpClient.end();
         return (responseCode == 200);
     }
