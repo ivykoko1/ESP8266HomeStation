@@ -11,6 +11,8 @@
 #include "DallasTemperature.h"
 #include "WiFiUdp.h"
 #include "WifiCredentials.h"
+#include "HomeApi.h"
+
 
 
 #define TEMPERATURE_SAMPLE_RATE 32
@@ -19,8 +21,9 @@
 #define HUMIDITY_SAMPLE_RATE 8
 #define HSR HUMIDITY_SAMPLE_RATE
 
-#define TIME_PER_SAMPLE 900 
+//#define DEBUG
 
+#define TIME_PER_SAMPLE 900
 #define TIME_LIGHT_SLEEP(r,t) (r*(t)+(1000*r))
 
 #define ONE_WIRE_BUS D2
@@ -39,6 +42,7 @@ DallasTemperature sensors(&oneWire);
 //NTP declarations
 WiFiUDP ntpUdp;
 NTPClient ntpClient(ntpUdp, "europe.pool.ntp.org", 7200);
+HomeApi homeApi("http://localhost:2100/api/insertTemperature/");
 
 void setup()
 {
@@ -51,23 +55,26 @@ void setup()
   dht.begin();
   sensors.begin();
   WiFi.begin(AP_BSSID, AP_PASS);
-
+  #ifdef DEBUG
   Serial.printf("Trying to connect to %s .", AP_BSSID);
-
+  #endif
   while (WiFi.status() != WL_CONNECTED)
   {
     delay(450);
+    #ifdef DEBUG
     Serial.print(".");
+    #endif
   }
-
+  #ifdef DEBUG
   Serial.println();
   Serial.println(F("WiFi connection Successful"));
   Serial.print(F("The IP Address of ESP8266 Module is: "));
   Serial.println(WiFi.localIP()); // Print the IP address
-
+  #endif
   ntpClient.begin();
   ntpClient.update();
   delay(10);
+  homeApi.begin();
   Serial.print(F("Boot time: "));
   Serial.println(ntpClient.getFormattedTime());
 
@@ -90,20 +97,31 @@ void loop()
       h += dht.readHumidity();
     }
     digitalWrite(LED_PIN, 0);
-    delay(TIME_PER_SAMPLE);
+    delay(TIME_PER_SAMPLE+15);
   }
-  ntpClient.forceUpdate();
-  Serial.print(F("Time:"));
+  ntpClient.forceUpdate(); 
+  
+  #ifdef DEBUG
+  Serial.print(F("time:"));
   Serial.println(ntpClient.getFormattedTime());
+  #endif
 
+  unsigned long epoch = ntpClient.getEpochTime();
   float avgDallas = dt / TSR;
   float avgHum = h / (TSR / HSR);
-
   float dallasTic = dht.computeHeatIndex(avgDallas, avgHum, false);
 
-  Serial.println(F("DS18B20:"));
-  Serial.printf("%.4fºC, %.1f percent humidity, %.4fºC Perceived temperature.\n", avgDallas, avgHum, dallasTic);
-  Serial.printf("Sleeping for %i secs...", (TIME_LIGHT_SLEEP(TEMPERATURE_SAMPLE_RATE, TIME_PER_SAMPLE) / 1000 ));
+  struct HomeApi::sensor_data_t data =
+        {
+            avgDallas,
+            avgHum,
+            dallasTic,
+            epoch
+        };
+  homeApi.sendData(data);
+  //Serial.printf("%.4fºC, %.1f %c, %.4fºC.\n", avgDallas, avgHum, '%', dallasTic);
+  #ifdef DEBUG
+  Serial.printf("Sleeping for %i secs...\n", (TIME_LIGHT_SLEEP(TEMPERATURE_SAMPLE_RATE, TIME_PER_SAMPLE) / 1000 ));
+  #endif
   delay(TIME_LIGHT_SLEEP(TEMPERATURE_SAMPLE_RATE, TIME_PER_SAMPLE));
-  Serial.println(F("Reading now"));
 }
